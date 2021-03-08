@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Using Parcel with OpenLayers</title>
+    <style data-parcel-key="586c6842c1ed0c1dbd9b4bbbb4495041">
+      #map {
+        width: 400px;
+        height: 250px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <script src="df55e7008071aa4dba9b86cf64e66811"></script>
+  </body>
+</html>

@@ -1,0 +1,543 @@
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.measureTextWidth = measureTextWidth;
+exports.measureAndCacheTextWidth = measureAndCacheTextWidth;
+exports.measureTextWidths = measureTextWidths;
+exports.rotateAtOffset = rotateAtOffset;
+exports.drawImageOrLabel = drawImageOrLabel;
+exports.createTransformString = createTransformString;
+exports.measureTextHeight = exports.registerFont = exports.textHeights = exports.labelCache = exports.checkedFonts = exports.defaultLineWidth = exports.defaultPadding = exports.defaultTextBaseline = exports.defaultTextAlign = exports.defaultStrokeStyle = exports.defaultMiterLimit = exports.defaultLineJoin = exports.defaultLineDashOffset = exports.defaultLineDash = exports.defaultLineCap = exports.defaultFillStyle = exports.defaultFont = void 0;
+
+var _Object = _interopRequireDefault(require("../Object.js"));
+
+var _Target = _interopRequireDefault(require("../events/Target.js"));
+
+var _has = require("../has.js");
+
+var _obj = require("../obj.js");
+
+var _dom = require("../dom.js");
+
+var _css = require("../css.js");
+
+var _transform = require("../transform.js");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * @module ol/render/canvas
+ */
+
+/**
+ * @typedef {Object} FillState
+ * @property {import("../colorlike.js").ColorLike} fillStyle
+ */
+
+/**
+ * @typedef Label
+ * @property {number} width
+ * @property {number} height
+ * @property {Array<string|number>} contextInstructions
+ */
+
+/**
+ * @typedef {Object} FillStrokeState
+ * @property {import("../colorlike.js").ColorLike} [currentFillStyle]
+ * @property {import("../colorlike.js").ColorLike} [currentStrokeStyle]
+ * @property {CanvasLineCap} [currentLineCap]
+ * @property {Array<number>} currentLineDash
+ * @property {number} [currentLineDashOffset]
+ * @property {CanvasLineJoin} [currentLineJoin]
+ * @property {number} [currentLineWidth]
+ * @property {number} [currentMiterLimit]
+ * @property {number} [lastStroke]
+ * @property {import("../colorlike.js").ColorLike} [fillStyle]
+ * @property {import("../colorlike.js").ColorLike} [strokeStyle]
+ * @property {CanvasLineCap} [lineCap]
+ * @property {Array<number>} lineDash
+ * @property {number} [lineDashOffset]
+ * @property {CanvasLineJoin} [lineJoin]
+ * @property {number} [lineWidth]
+ * @property {number} [miterLimit]
+ */
+
+/**
+ * @typedef {Object} StrokeState
+ * @property {CanvasLineCap} lineCap
+ * @property {Array<number>} lineDash
+ * @property {number} lineDashOffset
+ * @property {CanvasLineJoin} lineJoin
+ * @property {number} lineWidth
+ * @property {number} miterLimit
+ * @property {import("../colorlike.js").ColorLike} strokeStyle
+ */
+
+/**
+ * @typedef {Object} TextState
+ * @property {string} font
+ * @property {string} [textAlign]
+ * @property {string} textBaseline
+ * @property {string} [placement]
+ * @property {number} [maxAngle]
+ * @property {boolean} [overflow]
+ * @property {import("../style/Fill.js").default} [backgroundFill]
+ * @property {import("../style/Stroke.js").default} [backgroundStroke]
+ * @property {import("../size.js").Size} [scale]
+ * @property {Array<number>} [padding]
+ */
+
+/**
+ * @typedef {Object} SerializableInstructions
+ * @property {Array<*>} instructions The rendering instructions.
+ * @property {Array<*>} hitDetectionInstructions The rendering hit detection instructions.
+ * @property {Array<number>} coordinates The array of all coordinates.
+ * @property {!Object<string, TextState>} [textStates] The text states (decluttering).
+ * @property {!Object<string, FillState>} [fillStates] The fill states (decluttering).
+ * @property {!Object<string, StrokeState>} [strokeStates] The stroke states (decluttering).
+ */
+
+/**
+ * @typedef {Object<number, import("./canvas/Executor.js").ReplayImageOrLabelArgs>} DeclutterImageWithText
+ */
+
+/**
+ * @const
+ * @type {string}
+ */
+var defaultFont = '10px sans-serif';
+/**
+ * @const
+ * @type {import("../colorlike.js").ColorLike}
+ */
+
+exports.defaultFont = defaultFont;
+var defaultFillStyle = '#000';
+/**
+ * @const
+ * @type {CanvasLineCap}
+ */
+
+exports.defaultFillStyle = defaultFillStyle;
+var defaultLineCap = 'round';
+/**
+ * @const
+ * @type {Array<number>}
+ */
+
+exports.defaultLineCap = defaultLineCap;
+var defaultLineDash = [];
+/**
+ * @const
+ * @type {number}
+ */
+
+exports.defaultLineDash = defaultLineDash;
+var defaultLineDashOffset = 0;
+/**
+ * @const
+ * @type {CanvasLineJoin}
+ */
+
+exports.defaultLineDashOffset = defaultLineDashOffset;
+var defaultLineJoin = 'round';
+/**
+ * @const
+ * @type {number}
+ */
+
+exports.defaultLineJoin = defaultLineJoin;
+var defaultMiterLimit = 10;
+/**
+ * @const
+ * @type {import("../colorlike.js").ColorLike}
+ */
+
+exports.defaultMiterLimit = defaultMiterLimit;
+var defaultStrokeStyle = '#000';
+/**
+ * @const
+ * @type {string}
+ */
+
+exports.defaultStrokeStyle = defaultStrokeStyle;
+var defaultTextAlign = 'center';
+/**
+ * @const
+ * @type {string}
+ */
+
+exports.defaultTextAlign = defaultTextAlign;
+var defaultTextBaseline = 'middle';
+/**
+ * @const
+ * @type {Array<number>}
+ */
+
+exports.defaultTextBaseline = defaultTextBaseline;
+var defaultPadding = [0, 0, 0, 0];
+/**
+ * @const
+ * @type {number}
+ */
+
+exports.defaultPadding = defaultPadding;
+var defaultLineWidth = 1;
+/**
+ * @type {BaseObject}
+ */
+
+exports.defaultLineWidth = defaultLineWidth;
+var checkedFonts = new _Object.default();
+/**
+ * The label cache for text rendering. To change the default cache size of 2048
+ * entries, use {@link module:ol/structs/LRUCache#setSize}.
+ * Deprecated - there is no label cache any more.
+ * @type {?}
+ * @api
+ * @deprecated
+ */
+
+exports.checkedFonts = checkedFonts;
+var labelCache = new _Target.default();
+exports.labelCache = labelCache;
+
+labelCache.setSize = function () {
+  console.warn('labelCache is deprecated.'); //eslint-disable-line
+};
+/**
+ * @type {CanvasRenderingContext2D}
+ */
+
+
+var measureContext = null;
+/**
+ * @type {string}
+ */
+
+var measureFont;
+/**
+ * @type {!Object<string, number>}
+ */
+
+var textHeights = {};
+/**
+ * Clears the label cache when a font becomes available.
+ * @param {string} fontSpec CSS font spec.
+ */
+
+exports.textHeights = textHeights;
+
+var registerFont = function () {
+  var retries = 100;
+  var size = '32px ';
+  var referenceFonts = ['monospace', 'serif'];
+  var len = referenceFonts.length;
+  var text = 'wmytzilWMYTZIL@#/&?$%10\uF013';
+  var interval, referenceWidth;
+  /**
+   * @param {string} fontStyle Css font-style
+   * @param {string} fontWeight Css font-weight
+   * @param {*} fontFamily Css font-family
+   * @return {boolean} Font with style and weight is available
+   */
+
+  function isAvailable(fontStyle, fontWeight, fontFamily) {
+    var available = true;
+
+    for (var i = 0; i < len; ++i) {
+      var referenceFont = referenceFonts[i];
+      referenceWidth = measureTextWidth(fontStyle + ' ' + fontWeight + ' ' + size + referenceFont, text);
+
+      if (fontFamily != referenceFont) {
+        var width = measureTextWidth(fontStyle + ' ' + fontWeight + ' ' + size + fontFamily + ',' + referenceFont, text); // If width and referenceWidth are the same, then the fallback was used
+        // instead of the font we wanted, so the font is not available.
+
+        available = available && width != referenceWidth;
+      }
+    }
+
+    if (available) {
+      return true;
+    }
+
+    return false;
+  }
+
+  function check() {
+    var done = true;
+    var fonts = checkedFonts.getKeys();
+
+    for (var i = 0, ii = fonts.length; i < ii; ++i) {
+      var font = fonts[i];
+
+      if (checkedFonts.get(font) < retries) {
+        if (isAvailable.apply(this, font.split('\n'))) {
+          (0, _obj.clear)(textHeights); // Make sure that loaded fonts are picked up by Safari
+
+          measureContext = null;
+          measureFont = undefined;
+          checkedFonts.set(font, retries);
+        } else {
+          checkedFonts.set(font, checkedFonts.get(font) + 1, true);
+          done = false;
+        }
+      }
+    }
+
+    if (done) {
+      clearInterval(interval);
+      interval = undefined;
+    }
+  }
+
+  return function (fontSpec) {
+    var font = (0, _css.getFontParameters)(fontSpec);
+
+    if (!font) {
+      return;
+    }
+
+    var families = font.families;
+
+    for (var i = 0, ii = families.length; i < ii; ++i) {
+      var family = families[i];
+      var key = font.style + '\n' + font.weight + '\n' + family;
+
+      if (checkedFonts.get(key) === undefined) {
+        checkedFonts.set(key, retries, true);
+
+        if (!isAvailable(font.style, font.weight, family)) {
+          checkedFonts.set(key, 0, true);
+
+          if (interval === undefined) {
+            interval = setInterval(check, 32);
+          }
+        }
+      }
+    }
+  };
+}();
+/**
+ * @param {string} font Font to use for measuring.
+ * @return {import("../size.js").Size} Measurement.
+ */
+
+
+exports.registerFont = registerFont;
+
+var measureTextHeight = function () {
+  /**
+   * @type {HTMLDivElement}
+   */
+  var div;
+  return function (fontSpec) {
+    var height = textHeights[fontSpec];
+
+    if (height == undefined) {
+      if (_has.WORKER_OFFSCREEN_CANVAS) {
+        var font = (0, _css.getFontParameters)(fontSpec);
+        var metrics = measureText(fontSpec, 'Žg');
+        var lineHeight = isNaN(Number(font.lineHeight)) ? 1.2 : Number(font.lineHeight);
+        height = lineHeight * (metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent);
+      } else {
+        if (!div) {
+          div = document.createElement('div');
+          div.innerHTML = 'M';
+          div.style.margin = '0 !important';
+          div.style.padding = '0 !important';
+          div.style.position = 'absolute !important';
+          div.style.left = '-99999px !important';
+        }
+
+        div.style.font = fontSpec;
+        document.body.appendChild(div);
+        height = div.offsetHeight;
+        document.body.removeChild(div);
+      }
+
+      textHeights[fontSpec] = height;
+    }
+
+    return height;
+  };
+}();
+/**
+ * @param {string} font Font.
+ * @param {string} text Text.
+ * @return {TextMetrics} Text metrics.
+ */
+
+
+exports.measureTextHeight = measureTextHeight;
+
+function measureText(font, text) {
+  if (!measureContext) {
+    measureContext = (0, _dom.createCanvasContext2D)(1, 1);
+  }
+
+  if (font != measureFont) {
+    measureContext.font = font;
+    measureFont = measureContext.font;
+  }
+
+  return measureContext.measureText(text);
+}
+/**
+ * @param {string} font Font.
+ * @param {string} text Text.
+ * @return {number} Width.
+ */
+
+
+function measureTextWidth(font, text) {
+  return measureText(font, text).width;
+}
+/**
+ * Measure text width using a cache.
+ * @param {string} font The font.
+ * @param {string} text The text to measure.
+ * @param {Object<string, number>} cache A lookup of cached widths by text.
+ * @returns {number} The text width.
+ */
+
+
+function measureAndCacheTextWidth(font, text, cache) {
+  if (text in cache) {
+    return cache[text];
+  }
+
+  var width = measureTextWidth(font, text);
+  cache[text] = width;
+  return width;
+}
+/**
+ * @param {string} font Font to use for measuring.
+ * @param {Array<string>} lines Lines to measure.
+ * @param {Array<number>} widths Array will be populated with the widths of
+ * each line.
+ * @return {number} Width of the whole text.
+ */
+
+
+function measureTextWidths(font, lines, widths) {
+  var numLines = lines.length;
+  var width = 0;
+
+  for (var i = 0; i < numLines; ++i) {
+    var currentWidth = measureTextWidth(font, lines[i]);
+    width = Math.max(width, currentWidth);
+    widths.push(currentWidth);
+  }
+
+  return width;
+}
+/**
+ * @param {CanvasRenderingContext2D} context Context.
+ * @param {number} rotation Rotation.
+ * @param {number} offsetX X offset.
+ * @param {number} offsetY Y offset.
+ */
+
+
+function rotateAtOffset(context, rotation, offsetX, offsetY) {
+  if (rotation !== 0) {
+    context.translate(offsetX, offsetY);
+    context.rotate(rotation);
+    context.translate(-offsetX, -offsetY);
+  }
+}
+/**
+ * @param {CanvasRenderingContext2D} context Context.
+ * @param {import("../transform.js").Transform|null} transform Transform.
+ * @param {number} opacity Opacity.
+ * @param {Label|HTMLCanvasElement|HTMLImageElement|HTMLVideoElement} labelOrImage Label.
+ * @param {number} originX Origin X.
+ * @param {number} originY Origin Y.
+ * @param {number} w Width.
+ * @param {number} h Height.
+ * @param {number} x X.
+ * @param {number} y Y.
+ * @param {import("../size.js").Size} scale Scale.
+ */
+
+
+function drawImageOrLabel(context, transform, opacity, labelOrImage, originX, originY, w, h, x, y, scale) {
+  context.save();
+
+  if (opacity !== 1) {
+    context.globalAlpha *= opacity;
+  }
+
+  if (transform) {
+    context.setTransform.apply(context, transform);
+  }
+
+  if (
+  /** @type {*} */
+  labelOrImage.contextInstructions) {
+    // label
+    context.translate(x, y);
+    context.scale(scale[0], scale[1]);
+    executeLabelInstructions(
+    /** @type {Label} */
+    labelOrImage, context);
+  } else if (scale[0] < 0 || scale[1] < 0) {
+    // flipped image
+    context.translate(x, y);
+    context.scale(scale[0], scale[1]);
+    context.drawImage(
+    /** @type {HTMLCanvasElement|HTMLImageElement|HTMLVideoElement} */
+    labelOrImage, originX, originY, w, h, 0, 0, w, h);
+  } else {
+    // if image not flipped translate and scale can be avoided
+    context.drawImage(
+    /** @type {HTMLCanvasElement|HTMLImageElement|HTMLVideoElement} */
+    labelOrImage, originX, originY, w, h, x, y, w * scale[0], h * scale[1]);
+  }
+
+  context.restore();
+}
+/**
+ * @param {Label} label Label.
+ * @param {CanvasRenderingContext2D} context Context.
+ */
+
+
+function executeLabelInstructions(label, context) {
+  var contextInstructions = label.contextInstructions;
+
+  for (var i = 0, ii = contextInstructions.length; i < ii; i += 2) {
+    if (Array.isArray(contextInstructions[i + 1])) {
+      context[contextInstructions[i]].apply(context, contextInstructions[i + 1]);
+    } else {
+      context[contextInstructions[i]] = contextInstructions[i + 1];
+    }
+  }
+}
+/**
+ * @type {HTMLCanvasElement}
+ * @private
+ */
+
+
+var createTransformStringCanvas = null;
+/**
+ * @param {import("../transform.js").Transform} transform Transform.
+ * @return {string} CSS transform.
+ */
+
+function createTransformString(transform) {
+  if (_has.WORKER_OFFSCREEN_CANVAS) {
+    return (0, _transform.toString)(transform);
+  } else {
+    if (!createTransformStringCanvas) {
+      createTransformStringCanvas = (0, _dom.createCanvasContext2D)(1, 1).canvas;
+    }
+
+    createTransformStringCanvas.style.transform = (0, _transform.toString)(transform);
+    return createTransformStringCanvas.style.transform;
+  }
+}

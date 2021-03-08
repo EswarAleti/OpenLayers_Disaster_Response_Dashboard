@@ -1,0 +1,149 @@
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.getContext = getContext;
+exports.getSupportedExtensions = getSupportedExtensions;
+exports.FLOAT = exports.UNSIGNED_INT = exports.UNSIGNED_SHORT = exports.UNSIGNED_BYTE = exports.DYNAMIC_DRAW = exports.STATIC_DRAW = exports.STREAM_DRAW = exports.ELEMENT_ARRAY_BUFFER = exports.ARRAY_BUFFER = void 0;
+
+/**
+ * @module ol/webgl
+ */
+
+/**
+ * Constants taken from goog.webgl
+ */
+
+/**
+ * Used by {@link module:ol/webgl/Helper~WebGLHelper} for buffers containing vertices data, such as
+ * position, color, texture coordinate, etc. These vertices are then referenced by an index buffer
+ * to be drawn on screen (see {@link module:ol/webgl.ELEMENT_ARRAY_BUFFER}).
+ * @const
+ * @type {number}
+ * @api
+ */
+var ARRAY_BUFFER = 0x8892;
+/**
+ * Used by {@link module:ol/webgl/Helper~WebGLHelper} for buffers containing indices data.
+ * Index buffers are essentially lists of references to vertices defined in a vertex buffer
+ * (see {@link module:ol/webgl.ARRAY_BUFFER}), and define the primitives (triangles) to be drawn.
+ * @const
+ * @type {number}
+ * @api
+ */
+
+exports.ARRAY_BUFFER = ARRAY_BUFFER;
+var ELEMENT_ARRAY_BUFFER = 0x8893;
+/**
+ * Used by {link module:ol/webgl/Buffer~WebGLArrayBuffer}.
+ * @const
+ * @type {number}
+ * @api
+ */
+
+exports.ELEMENT_ARRAY_BUFFER = ELEMENT_ARRAY_BUFFER;
+var STREAM_DRAW = 0x88e0;
+/**
+ * Used by {link module:ol/webgl/Buffer~WebGLArrayBuffer}.
+ * @const
+ * @type {number}
+ * @api
+ */
+
+exports.STREAM_DRAW = STREAM_DRAW;
+var STATIC_DRAW = 0x88e4;
+/**
+ * Used by {link module:ol/webgl/Buffer~WebGLArrayBuffer}.
+ * @const
+ * @type {number}
+ * @api
+ */
+
+exports.STATIC_DRAW = STATIC_DRAW;
+var DYNAMIC_DRAW = 0x88e8;
+/**
+ * @const
+ * @type {number}
+ */
+
+exports.DYNAMIC_DRAW = DYNAMIC_DRAW;
+var UNSIGNED_BYTE = 0x1401;
+/**
+ * @const
+ * @type {number}
+ */
+
+exports.UNSIGNED_BYTE = UNSIGNED_BYTE;
+var UNSIGNED_SHORT = 0x1403;
+/**
+ * @const
+ * @type {number}
+ */
+
+exports.UNSIGNED_SHORT = UNSIGNED_SHORT;
+var UNSIGNED_INT = 0x1405;
+/**
+ * @const
+ * @type {number}
+ */
+
+exports.UNSIGNED_INT = UNSIGNED_INT;
+var FLOAT = 0x1406;
+/** end of goog.webgl constants
+ */
+
+/**
+ * @const
+ * @type {Array<string>}
+ */
+
+exports.FLOAT = FLOAT;
+var CONTEXT_IDS = ['experimental-webgl', 'webgl', 'webkit-3d', 'moz-webgl'];
+/**
+ * @param {HTMLCanvasElement} canvas Canvas.
+ * @param {Object=} opt_attributes Attributes.
+ * @return {WebGLRenderingContext} WebGL rendering context.
+ */
+
+function getContext(canvas, opt_attributes) {
+  var ii = CONTEXT_IDS.length;
+
+  for (var i = 0; i < ii; ++i) {
+    try {
+      var context = canvas.getContext(CONTEXT_IDS[i], opt_attributes);
+
+      if (context) {
+        return (
+          /** @type {!WebGLRenderingContext} */
+          context
+        );
+      }
+    } catch (e) {// pass
+    }
+  }
+
+  return null;
+}
+/**
+ * @type {Array<string>}
+ */
+
+
+var supportedExtensions;
+/**
+ * @return {Array<string>} List of supported WebGL extensions.
+ */
+
+function getSupportedExtensions() {
+  if (!supportedExtensions) {
+    var canvas = document.createElement('canvas');
+    var gl = getContext(canvas);
+
+    if (gl) {
+      supportedExtensions = gl.getSupportedExtensions();
+    }
+  }
+
+  return supportedExtensions;
+}

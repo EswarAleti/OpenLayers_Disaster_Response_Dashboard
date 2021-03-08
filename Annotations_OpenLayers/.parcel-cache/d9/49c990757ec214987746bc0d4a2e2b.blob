@@ -1,0 +1,95 @@
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+Object.defineProperty(exports, "Circle", {
+  enumerable: true,
+  get: function () {
+    return _Circle.default;
+  }
+});
+Object.defineProperty(exports, "Geometry", {
+  enumerable: true,
+  get: function () {
+    return _Geometry.default;
+  }
+});
+Object.defineProperty(exports, "GeometryCollection", {
+  enumerable: true,
+  get: function () {
+    return _GeometryCollection.default;
+  }
+});
+Object.defineProperty(exports, "LinearRing", {
+  enumerable: true,
+  get: function () {
+    return _LinearRing.default;
+  }
+});
+Object.defineProperty(exports, "LineString", {
+  enumerable: true,
+  get: function () {
+    return _LineString.default;
+  }
+});
+Object.defineProperty(exports, "MultiLineString", {
+  enumerable: true,
+  get: function () {
+    return _MultiLineString.default;
+  }
+});
+Object.defineProperty(exports, "MultiPoint", {
+  enumerable: true,
+  get: function () {
+    return _MultiPoint.default;
+  }
+});
+Object.defineProperty(exports, "MultiPolygon", {
+  enumerable: true,
+  get: function () {
+    return _MultiPolygon.default;
+  }
+});
+Object.defineProperty(exports, "Point", {
+  enumerable: true,
+  get: function () {
+    return _Point.default;
+  }
+});
+Object.defineProperty(exports, "Polygon", {
+  enumerable: true,
+  get: function () {
+    return _Polygon.default;
+  }
+});
+Object.defineProperty(exports, "SimpleGeometry", {
+  enumerable: true,
+  get: function () {
+    return _SimpleGeometry.default;
+  }
+});
+
+var _Circle = _interopRequireDefault(require("./geom/Circle.js"));
+
+var _Geometry = _interopRequireDefault(require("./geom/Geometry.js"));
+
+var _GeometryCollection = _interopRequireDefault(require("./geom/GeometryCollection.js"));
+
+var _LinearRing = _interopRequireDefault(require("./geom/LinearRing.js"));
+
+var _LineString = _interopRequireDefault(require("./geom/LineString.js"));
+
+var _MultiLineString = _interopRequireDefault(require("./geom/MultiLineString.js"));
+
+var _MultiPoint = _interopRequireDefault(require("./geom/MultiPoint.js"));
+
+var _MultiPolygon = _interopRequireDefault(require("./geom/MultiPolygon.js"));
+
+var _Point = _interopRequireDefault(require("./geom/Point.js"));
+
+var _Polygon = _interopRequireDefault(require("./geom/Polygon.js"));
+
+var _SimpleGeometry = _interopRequireDefault(require("./geom/SimpleGeometry.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }

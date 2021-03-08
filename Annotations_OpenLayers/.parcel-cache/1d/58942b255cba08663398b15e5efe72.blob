@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html>
+  <head><link rel="stylesheet" href="/Annotations_OpenLayers.8228596c.css">
+    <meta charset="utf-8">
+    <title>OpenLayers</title>
+  </head>
+  <body>
+    <div id="map"></div>
+    <script src="/style.8013b701.css"></script>
+    <script src="/Annotations_OpenLayers.b1e134cf.js"></script>
+  </body>
+</html>

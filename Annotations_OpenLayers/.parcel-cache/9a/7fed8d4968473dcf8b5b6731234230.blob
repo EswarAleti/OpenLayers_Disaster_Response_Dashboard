@@ -1,0 +1,43 @@
+"use strict";
+
+require("ol/ol.css");
+
+var _ol2 = require("ol");
+
+var _Tile = _interopRequireDefault(require("ol/layer/Tile"));
+
+var layer = _interopRequireWildcard(require("ol/layer"));
+
+var _OSM = _interopRequireDefault(require("ol/source/OSM"));
+
+var olCoordinate = _interopRequireWildcard(require("ol/coordinate"));
+
+var _proj = require("ol/proj");
+
+function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+const map = new _ol2.Map({
+  target: 'map',
+  layers: [new _Tile.default({
+    source: new _OSM.default()
+  })],
+  view: new _ol2.View({
+    center: (0, _proj.fromLonLat)([79.4192, 13.6288]),
+    zoom: 8
+  })
+});
+var layer1 = new layer.Vector({
+  source: new ol.source.Vector({
+    features: [new ol.Feature({
+      geometry: new ol.geom.Point(ol.proj.fromLonLat([4.35247, 50.84673]))
+    })]
+  })
+});
+map.addLayer(layer1);
+map.on('click', function (e) {
+  console.log('Longitude: ' + (0, _proj.toLonLat)(e.coordinate)[0] + ' Lattitude: ' + (0, _proj.toLonLat)(e.coordinate)[1]);
+});
