@@ -444,16 +444,15 @@ const map = new _ol2.Map({
     zoom: 8
   })
 });
-var layer = new olLayer.Vector({
-  source: new olSource.Vector({
-    features: [new _ol2.Feature({
-      geometry: new _geom.Point((0, _proj.fromLonLat)([79.4192, 13.6288]))
-    })]
-  })
-});
-map.addLayer(layer);
 map.on('click', function (e) {
-  console.log('Longitude: ' + (0, _proj.toLonLat)(e.coordinate)[0] + ' Lattitude: ' + (0, _proj.toLonLat)(e.coordinate)[1]);
+  var layer = new olLayer.Vector({
+    source: new olSource.Vector({
+      features: [new _ol2.Feature({
+        geometry: new _geom.Point(e.coordinate)
+      })]
+    })
+  });
+  map.addLayer(layer); // console.log('Longitude: '+toLonLat(e.coordinate)[0]+' Lattitude: '+toLonLat(e.coordinate)[1]);
 });
 },{"ol/ol.css":"7a9e483d648a90c79e243d28d759fa0e","ol":"d508161663c01e01b3c77c7d9cf7a54d","ol/layer/Tile":"7be8d5b775af1c569a9fd193e3fc9c74","ol/source/OSM":"2830af7968bdb2842fec250377332672","ol/coordinate":"ee48e4acbcd4f065911ca5df46ca3484","ol/proj":"16f42148104006a5f1c0d5f095ce563a","ol/layer":"ed631786c8144b6f9acd15c0896fde06","ol/source":"b3e2b5ba8b1bf72265102926f53e6274","ol/geom":"779a6384c05d5c95d2d3e12b72115563"}],"7a9e483d648a90c79e243d28d759fa0e":[function() {},{}],"d508161663c01e01b3c77c7d9cf7a54d":[function(require,module,exports) {
 "use strict";

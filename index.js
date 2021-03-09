@@ -21,17 +21,16 @@ const map = new Map({
   })
 });
 
-var layer = new olLayer.Vector({
-     source: new olSource.Vector({
-         features: [
-             new Feature({
-                 geometry: new Point(fromLonLat([79.4192,13.6288]))
-             })
-         ]
-     })
- });
- map.addLayer(layer);
-
 map.on('click',function(e){
-  console.log('Longitude: '+toLonLat(e.coordinate)[0]+' Lattitude: '+toLonLat(e.coordinate)[1]);
+  var layer = new olLayer.Vector({
+    source: new olSource.Vector({
+        features: [
+            new Feature({
+                geometry: new Point(e.coordinate)
+            })
+        ]
+    })
+});
+map.addLayer(layer);
+  // console.log('Longitude: '+toLonLat(e.coordinate)[0]+' Lattitude: '+toLonLat(e.coordinate)[1]);
 })
